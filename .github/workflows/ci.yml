@@ -1,0 +1,42 @@
+name: Platzi CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar-proyecto:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+     
+    - name: Configurar Node.js versión ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Instalar dependencias
+      run: npm ci
+
+    - name: Ejecutar Linter
+      run: npm run lint
+
+    - name: Ejecutar Pruebas (Tests)
+      run: npm test
+
+    - name: Compilar Proyecto (Build)
+      run: npm run build
